@@ -1,0 +1,17 @@
+fastapi
+pydantic
+uvicorn
+pandas
+numpy
+joblib
+SQLAlchemy
+requests
+python-dotenv
+RapidFuzz
+pg8000
+scikit-learn
+xgboost
+python-jose
+passlib[bcrypt]
+python-multipart
+Pillow

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# Node
+node_modules/
+dist/
+.eslintcache
+
+# Project specific
+uploads/
+scratch/
+.coverage
+.pytest_cache/
+test_output.txt
+test_output_utf8.txt
+inputcopy.py
+
+# OS
+.DS_Store
+Thumbs.db
