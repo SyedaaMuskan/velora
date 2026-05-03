@@ -1,3 +1,12 @@
+---
+title: Velora API
+emoji: 🏎️
+colorFrom: blue
+colorTo: red
+sdk: docker
+app_port: 7860
+---
+
 # 🏎️ Velora: Premium AI-Powered Car Marketplace
 
 ![Velora Banner](https://img.shields.io/badge/Velora-Premium_Marketplace-FF4B2B?style=for-the-badge&logo=fastapi&logoColor=white)
