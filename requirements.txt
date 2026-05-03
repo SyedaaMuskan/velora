@@ -9,6 +9,7 @@ requests
 python-dotenv
 RapidFuzz
 pg8000
+psycopg2-binary
 scikit-learn
 xgboost
 python-jose
