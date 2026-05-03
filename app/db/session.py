@@ -16,6 +16,13 @@ if DATABASE_URL:
     elif DATABASE_URL.startswith("postgresql://") and "+pg8000" not in DATABASE_URL:
         DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
 
+# Ensure SSL is required for Supabase/Cloud connections
+if DATABASE_URL and "sslmode" not in DATABASE_URL:
+    if "?" in DATABASE_URL:
+        DATABASE_URL += "&sslmode=require"
+    else:
+        DATABASE_URL += "?sslmode=require"
+
 # Create engine (connection to PostgreSQL)
 if not DATABASE_URL:
     print("WARNING: DATABASE_URL is not set. Using local SQLite.")
