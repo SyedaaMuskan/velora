@@ -207,19 +207,20 @@ def analyze_car_price(
 
 
 @router.get("/listings")
-def get_all_listings(db: Session = Depends(get_db)):
+def get_all_listings(request: Request, db: Session = Depends(get_db)):
+    base_url = str(request.base_url).rstrip('/')
     listings = db.query(CarListing).order_by(CarListing.id.desc()).all()
     # Add image_url to each listing
     for car in listings:
         if car.images:
-            # Construct URL (assuming backend runs on localhost:8000)
-            car.image_url = f"http://localhost:8000/{car.images[0].image_path}"
+            car.image_url = f"{base_url}/{car.images[0].image_path}"
         else:
             car.image_url = None
     return listings
 
 @router.get("/listing/{id}")
-def get_single_listing(id: int, db: Session = Depends(get_db)):
+def get_single_listing(id: int, request: Request, db: Session = Depends(get_db)):
+    base_url = str(request.base_url).rstrip('/')
     car = db.query(CarListing).filter(CarListing.id == id).first()
     if not car:
         raise HTTPException(status_code=404, detail="Listing not found")
@@ -231,8 +232,8 @@ def get_single_listing(id: int, db: Session = Depends(get_db)):
     
     # Add image_url and all images
     if car.images:
-        car.image_url = f"http://localhost:8000/{car.images[0].image_path}"
-        car.all_images = [f"http://localhost:8000/{img.image_path}" for img in car.images]
+        car.image_url = f"{base_url}/{car.images[0].image_path}"
+        car.all_images = [f"{base_url}/{img.image_path}" for img in car.images]
     else:
         car.image_url = None
     car.owner_name = car.owner.name if car.owner else "Velora User"
@@ -253,9 +254,11 @@ def filter_cars(
     min_price: float = None,
     max_price: float = None,
     location: str = None,
+    request: Request = None,
     credentials: Optional[HTTPAuthorizationCredentials] = Security(HTTPBearer(auto_error=False)),
     db: Session = Depends(get_db)
 ):
+    base_url = str(request.base_url).rstrip('/') if request else "http://localhost:8000"
     if credentials:
         user_id = get_current_user(credentials.credentials)
         filters = json.dumps({"min_price": min_price, "max_price": max_price, "location": location})
@@ -274,7 +277,7 @@ def filter_cars(
     listings = query.order_by(CarListing.id.desc()).all()
     for car in listings:
         if car.images:
-            car.image_url = f"http://localhost:8000/{car.images[0].image_path}"
+            car.image_url = f"{base_url}/{car.images[0].image_path}"
         else:
             car.image_url = None
     return listings
@@ -282,9 +285,11 @@ def filter_cars(
 @router.get("/search")
 def search_cars(
     query: str, 
+    request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Security(HTTPBearer(auto_error=False)),
     db: Session = Depends(get_db)
 ):
+    base_url = str(request.base_url).rstrip('/')
     if credentials:
         user_id = get_current_user(credentials.credentials)
         new_search = SearchHistory(user_id=user_id, query=query, filters="{}")
@@ -308,7 +313,7 @@ def search_cars(
 
     for car in listings:
         if car.images:
-            car.image_url = f"http://localhost:8000/{car.images[0].image_path}"
+            car.image_url = f"{base_url}/{car.images[0].image_path}"
         else:
             car.image_url = None
             

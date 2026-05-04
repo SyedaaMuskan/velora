@@ -59,13 +59,16 @@ def list_predictions(db: Session = Depends(get_db)):
 def predict_car(
     car: CarInput, 
     
-    credentials: HTTPAuthorizationCredentials = Security(security),
+    credentials: Optional[HTTPAuthorizationCredentials] = Security(security, auto_error=False),
     db: Session = Depends(get_db)
 ):
-
-    
-    token = credentials.credentials
-    user_id = get_current_user(token)
+    user_id = None
+    if credentials:
+        token = credentials.credentials
+        try:
+            user_id = get_current_user(token)
+        except:
+            user_id = None
 
     # Convert validated Pydantic model to a dictionary
     data = car.dict()
