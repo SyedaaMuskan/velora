@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.db.session import SessionLocal
@@ -22,7 +22,11 @@ def get_auth_user(credentials: HTTPAuthorizationCredentials = Security(security)
     return user_id
 
 @router.get("/user-dashboard")
-def get_user_analytics(user_id: int = Depends(get_auth_user), db: Session = Depends(get_db)):
+def get_user_analytics(request: Request, user_id: int = Depends(get_auth_user), db: Session = Depends(get_db)):
+    base_url = str(request.base_url).rstrip('/')
+    if "hf.space" in base_url:
+        base_url = base_url.replace("http://", "https://")
+        
     user = db.query(User).filter(User.id == user_id).first()
     listings = db.query(CarListing).filter(CarListing.owner_id == user_id).all()
     
@@ -43,7 +47,11 @@ def get_user_analytics(user_id: int = Depends(get_auth_user), db: Session = Depe
     # Add image_url to each listing
     for car in listings:
         if car.images:
-            car.image_url = f"http://localhost:8000/{car.images[0].image_path}"
+            img_path = car.images[0].image_path
+            if img_path.startswith("http"):
+                car.image_url = img_path
+            else:
+                car.image_url = f"{base_url}/{img_path}"
         else:
             car.image_url = None
 
@@ -59,7 +67,7 @@ def get_user_analytics(user_id: int = Depends(get_auth_user), db: Session = Depe
             "brand": l.brand,
             "model": l.model,
             "price": l.price,
-            "image_url": f"http://localhost:8000/{l.images[0].image_path}" if l.images else None
+            "image_url": (f"{base_url}/{l.images[0].image_path}" if l.images else None)
         } for l in user.saved]
     }
 

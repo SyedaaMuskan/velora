@@ -76,6 +76,9 @@ def predict_car(
     
     # Run ML Prediction
     predicted_price = predict_price(data)
+    # Convert from Millions to actual PKR if the model output is low
+    if predicted_price < 100:
+        predicted_price = predicted_price * 1000000
     
     # Attach results for database saving
     data["predicted_price"] = predicted_price
