@@ -213,7 +213,11 @@ def get_all_listings(request: Request, db: Session = Depends(get_db)):
     # Add image_url to each listing
     for car in listings:
         if car.images:
-            car.image_url = f"{base_url}/{car.images[0].image_path}"
+            img_path = car.images[0].image_path
+            if img_path.startswith("http"):
+                car.image_url = img_path
+            else:
+                car.image_url = f"{base_url}/{img_path}"
         else:
             car.image_url = None
     return listings
