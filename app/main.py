@@ -49,6 +49,22 @@ app.include_router(websockets.router)
 def read_root():
     return {"message": "Welcome to the Car Price Prediction API!"}
 
+@app.get("/db-check")
+def db_check():
+    from app.db.session import DATABASE_URL
+    db_type = "Unknown"
+    if "supabase" in DATABASE_URL.lower():
+        db_type = "Supabase"
+    elif "localhost" in DATABASE_URL.lower():
+        db_type = "Localhost (Error if on HF)"
+    elif "sqlite" in DATABASE_URL.lower():
+        db_type = "SQLite (Ephemeral)"
+    
+    return {
+        "database_connected": db_type,
+        "url_detected": DATABASE_URL.split("@")[-1] if "@" in DATABASE_URL else "No credentials shown"
+    }
+
 
 class ChatRequest(BaseModel):
     message: str
