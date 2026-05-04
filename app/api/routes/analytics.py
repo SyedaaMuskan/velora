@@ -53,7 +53,7 @@ def get_user_analytics(request: Request, user_id: int = Depends(get_auth_user), 
             else:
                 car.image_url = f"{base_url}/{img_path}"
         else:
-            car.image_url = None
+            car.image_url = "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80"
 
     return {
         "total_views": total_views,
@@ -67,7 +67,7 @@ def get_user_analytics(request: Request, user_id: int = Depends(get_auth_user), 
             "brand": l.brand,
             "model": l.model,
             "price": l.price,
-            "image_url": (f"{base_url}/{l.images[0].image_path}" if l.images else None)
+            "image_url": (l.images[0].image_path if l.images and l.images[0].image_path.startswith("http") else f"{base_url}/{l.images[0].image_path}" if l.images else "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80")
         } for l in user.saved]
     }
 

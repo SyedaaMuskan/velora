@@ -16,3 +16,4 @@ python-jose
 passlib[bcrypt]
 python-multipart
 Pillow
+supabase

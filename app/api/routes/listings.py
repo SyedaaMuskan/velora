@@ -75,18 +75,23 @@ async def create_car_listing(
         
     is_fraud = fraud_score >= 40.0
     
-    # 📁 2. Save Images to local storage
+    # 📁 2. Save Images to Supabase Cloud Storage
+    from app.utils.storage import upload_image
     image_paths = []
-    if not os.path.exists("uploads"):
-        os.makedirs("uploads")
-
     all_images = [image1, image2, image3, image4, image5]
-    for image in all_images:
-        if image and image.filename:
-            file_path = f"uploads/{image.filename}"
-            with open(file_path, "wb") as f:
-                f.write(await image.read())
-            image_paths.append(file_path)
+    for img_file in all_images:
+        if img_file and img_file.filename:
+            content = await img_file.read()
+            url = upload_image(content, img_file.filename)
+            if url:
+                image_paths.append(url)
+            else:
+                # Local fallback if Supabase is not configured
+                if not os.path.exists("uploads"): os.makedirs("uploads")
+                local_path = f"uploads/{img_file.filename}"
+                with open(local_path, "wb") as f:
+                    f.write(content)
+                image_paths.append(local_path)
 
     # 💾 3. Prepare Data for CarListing
     car_data = {
@@ -216,7 +221,10 @@ def get_all_listings(request: Request, db: Session = Depends(get_db)):
     for car in listings:
         if car.images:
             img_path = car.images[0].image_path
-            car.image_url = f"{base_url}/{img_path}"
+            if img_path.startswith("http"):
+                car.image_url = img_path
+            else:
+                car.image_url = f"{base_url}/{img_path}"
         else:
             car.image_url = "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80"
     return listings
@@ -235,10 +243,12 @@ def get_single_listing(id: int, request: Request, db: Session = Depends(get_db))
     
     # Add image_url and all images
     if car.images:
-        car.image_url = f"{base_url}/{car.images[0].image_path}"
-        car.all_images = [f"{base_url}/{img.image_path}" for img in car.images]
+        primary = car.images[0].image_path
+        car.image_url = primary if primary.startswith("http") else f"{base_url}/{primary}"
+        car.all_images = [img.image_path if img.image_path.startswith("http") else f"{base_url}/{img.image_path}" for img in car.images]
     else:
-        car.image_url = None
+        car.image_url = "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80"
+        car.all_images = [car.image_url]
     car.owner_name = car.owner.name if car.owner else "Velora User"
     return car
 
