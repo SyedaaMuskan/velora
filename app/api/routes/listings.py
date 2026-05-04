@@ -209,6 +209,8 @@ def analyze_car_price(
 @router.get("/listings")
 def get_all_listings(request: Request, db: Session = Depends(get_db)):
     base_url = str(request.base_url).rstrip('/')
+    if "hf.space" in base_url:
+        base_url = base_url.replace("http://", "https://")
     listings = db.query(CarListing).order_by(CarListing.id.desc()).all()
     # Add image_url to each listing
     for car in listings:
