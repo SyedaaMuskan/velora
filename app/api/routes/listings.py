@@ -216,12 +216,9 @@ def get_all_listings(request: Request, db: Session = Depends(get_db)):
     for car in listings:
         if car.images:
             img_path = car.images[0].image_path
-            if img_path.startswith("http"):
-                car.image_url = img_path
-            else:
-                car.image_url = f"{base_url}/{img_path}"
+            car.image_url = f"{base_url}/{img_path}"
         else:
-            car.image_url = None
+            car.image_url = "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80"
     return listings
 
 @router.get("/listing/{id}")
