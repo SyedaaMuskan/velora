@@ -50,8 +50,10 @@ def read_root():
     return {"message": "Welcome to the Car Price Prediction API!"}
 
 @app.get("/db-check")
-def db_check():
+def db_check(db: Session = Depends(get_db)):
     from app.db.session import DATABASE_URL
+    from app.db.models import CarListing, CarPrediction, User
+    
     db_type = "Unknown"
     if "supabase" in DATABASE_URL.lower():
         db_type = "Supabase"
@@ -60,8 +62,20 @@ def db_check():
     elif "sqlite" in DATABASE_URL.lower():
         db_type = "SQLite (Ephemeral)"
     
+    try:
+        listings_count = db.query(CarListing).count()
+        predictions_count = db.query(CarPrediction).count()
+        users_count = db.query(User).count()
+    except Exception as e:
+        return {"error": str(e), "db": db_type}
+
     return {
         "database_connected": db_type,
+        "counts": {
+            "listings": listings_count,
+            "predictions": predictions_count,
+            "users": users_count
+        },
         "url_detected": DATABASE_URL.split("@")[-1] if "@" in DATABASE_URL else "No credentials shown"
     }
 
