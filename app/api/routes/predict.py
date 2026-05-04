@@ -16,7 +16,7 @@ from app.ml.pipeline import predict_price
 from app.core.security import get_current_user
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Security
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 router = APIRouter()
 
@@ -60,7 +60,7 @@ def list_predictions(db: Session = Depends(get_db)):
 def predict_car(
     car: CarInput, 
     
-    credentials: Optional[HTTPAuthorizationCredentials] = Security(security, auto_error=False),
+    credentials: Optional[HTTPAuthorizationCredentials] = Security(security),
     db: Session = Depends(get_db)
 ):
     user_id = None
