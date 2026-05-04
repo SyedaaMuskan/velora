@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-for-dev")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
 
 pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
